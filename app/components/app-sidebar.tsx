@@ -2,6 +2,7 @@
 import { 
   SquarePen,
   Trash,
+  Ellipsis
 } from "lucide-react";
 import {
   Sidebar,
@@ -18,39 +19,88 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid"
+import { 
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
+
+
+export interface ChatProps{
+  id: string,
+  title: string,
+  messages: {role: string, content: string}[]
+}
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const [savedChat, setSavedChat] = useState<{title : string, uuid : string}[]>([]);
+  const [savedChat, setSavedChat] = useState<ChatProps[]>([]);
   const collapsed = state === 'collapsed';
 
   const fetchSavedChat = async () => {
-    const chatRegex = /^chatHistory#([^#]+)#([^#]+)$/;
+      for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
 
-       for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (!key) continue;
-
-        const match = key?.match(chatRegex);
-        if (match) {
-        const title = match[1]; // First capturing group ([^#]+)
-        const uuid = match[2];  // Second capturing group ([^#]+)
-    
-        // 5. Store the extracted data in the state
-        setSavedChat((prev) => [...prev, {title, uuid}]);
+      if (key.startsWith("chat") && key) {
+        const stringChat = localStorage.getItem(key)
+        const chat = JSON.parse(stringChat!)
+        setSavedChat(prev => [...prev, ...chat])
       }
     }
   }
+
+  const createNewChat = function () {
+    const newChat = {
+      id: uuidv4(),
+      title: "Untitled",
+      messages: []
+    }
+    // localStorage.setItem(`chat${newChat.id}`, JSON.stringify(newChat))
+    console.log(newChat)
+    // return newChat;
+  }
+
+  const deleteAllChat = () => {
+    // for (let i = 0; i < localStorage.length; i++) {
+    //   const key = localStorage.key(i);
+    //   if (!key) continue;
+
+    //   if (key.startsWith("chat") && key) {
+    //     localStorage.removeItem(key)
+    //   }
+    // }
+    console.log("delete all chat")
+  }
+
+  const renameChat = (id : string, newTitle: string) => {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+
+      if (key.includes(id) && key) {
+        const chat = JSON.parse(localStorage.getItem(key)!)
+        chat.title = newTitle;
+        localStorage.setItem(key, JSON.stringify(chat))
+      }
+    }
+  }
+
   useEffect(() => {
     async function init() {
       await fetchSavedChat();
     }
     init();
   }, [savedChat])
-  const items = savedChat;
+  // const items = savedChat;
+  const items = [
+    {title: "Untitled"}
+  ];
   const actions = [
-    { title: "New Chat ", url: "/student", icon: SquarePen },
-    { title: "Delete All", url: "/student/results", icon: Trash },
+    { title: "New Chat ", method: createNewChat, icon: SquarePen },
+    { title: "Delete All", method: deleteAllChat, icon: Trash },
   ];
 
 
@@ -103,14 +153,14 @@ export function AppSidebar() {
             {actions.map((action) => (
                 <SidebarMenuItem key={action.title} className="rounded-md border border-2 hover:border-black">
                   <SidebarMenuButton asChild>
-                    <a 
-                      href={action.url}
-                      className="hover:bg-sidebar-accent font-mono" 
+                    <Button
+                      onClick={() => {action.method()}}
+                      className="hover:bg-sidebar-accent font-mono bg-white text-black" 
                     //   activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                     >
                       <action.icon className="h-4 w-4" />
                       {!collapsed && <span>{action.title}</span>}
-                    </a>
+                    </Button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -118,19 +168,47 @@ export function AppSidebar() {
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel className={collapsed ? "sr-only" : "font-mono"}>HISTORY</SidebarGroupLabel>
-          <SidebarGroupLabel className={collapsed ? "sr-only" : "font-mono"}>TODAY</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a 
-                      href={"/student"}
-                      className="hover:bg-sidebar-accent font-mono" 
-                    //   activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-                    >
-                      {!collapsed && <span className="text-gray-500 text-sm">{item.title}</span>}
-                    </a>
+                    <div className="flex flex-1 justify-between">
+                    <Button 
+                      onClick={() => {console.log("set the chat url, fetch the chat and show")}}
+                      className="hover:bg-sidebar-accent font-mono bg-white text-black w-[300px] bg-transparent" 
+                      //activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                      >
+                        {!collapsed &&
+                          (
+                            <span className="text-gray-500 text-sm">{item.title}</span>
+                          )
+                        }
+                    </Button>
+                    {!collapsed &&
+                      (
+                        <div
+                          onClick={() => console.log("show rename and delete")}
+                        >
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Ellipsis className="h-4 w-4 z-10" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem className="flex justify-between font-mono">
+                              Rename
+                              <SquarePen />
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="flex justify-between font-mono">
+                              Delete
+                              <Trash />
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        </div>
+                      )
+                    }
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

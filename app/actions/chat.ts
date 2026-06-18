@@ -11,7 +11,7 @@ const sendMessage = async (messages: { role: string; content: string }[]) => {
 "messages": [
   {
     "role": "system",
-    "content": `use [Click:...] for any questions or requests made by the assistant, take the role of mentor
+    "content": `use [Click:...] for questions, where ... is the question text, examples of these questions; "what stack do you use?", "do i recommend a stack for you?"
       When you want to group detailed information, code, or sub-topics into an optional accordion/collapsible section, you must use the following custom structural tags:
 
       [COLLAPSIBLE: **Your Header Title Here**]

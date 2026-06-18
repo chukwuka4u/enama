@@ -26,29 +26,24 @@ export default function Chat() {
               {
                   messages.length == 0 ?
                 (
-                    // <div className="text-center p-4">
-                    //     <h3 className="text-[40px] font-bold">What can I help you with?</h3>
-                    //     <p className="text-xs text-gray-500">Ask a question, write code, or explore ideas.</p>
-                    // </div>
-                        <Card className=" w-[60%] bg-gray-200 ml-auto">
-                            <CardContent className="" >
-                                <Markdown remarkPlugins={[remarkGfm]}>{"Hello world ** hi** 1. a 2. b"}</Markdown>
-                            </CardContent>
-                        </Card>
+                    <div className="text-center p-4">
+                        <h3 className="md:text-[40px] md:font-bold font-semibold text-[30] leading-tight">What can I help you with?</h3>
+                        <p className="text-xs text-gray-500">Ask a question, write code, or explore ideas.</p>
+                    </div>  
                 )
                 : messages.map((message, index) => {
                     if (message.role === "assistant") {
                         const parsedMessage = parseMessageToJSX(message.content, () => console.log("option clicked"))
                         return (
-                            <Card className=" w-[70%] bg-gray-100" key={index}>
-                                <CardContent className="bg-slate-500">
+                            <Card className=" w-[80%] bg-gray-100 my-2" key={index}>
+                                <CardContent className="">
                                     {parsedMessage}
                                 </CardContent>
                             </Card>
                         )
                     }
                     return (
-                        <Card className=" w-[60%] bg-gray-100 ml-auto" key={index}>
+                        <Card className=" w-[60%] bg-gray-100 ml-auto my-2" key={index}>
                             <CardContent>
                                 <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
                             </CardContent>
@@ -57,14 +52,15 @@ export default function Chat() {
                 })
             }
             </div>
-            <div className="fixed bottom-3 bg-slate-100 w-full max-w-[800px] rounded-md p-4">
+            <div className="fixed bottom-3 bg-slate-100 w-full max-w-[800px] rounded-md p-1">
                 <Textarea placeholder="Ask anything..."
                     onFocus={() => setFocused(true)}
+                    value={newMessage.content}
                     onChange={(e) => setNewMessage({
                         role: "user",
                         content: e.target.value
                     })}
-                    className={`relative resize-none mb-4 ${focused ? "h-[150px]" : "h-[70px]"}`}
+                    className={`relative resize-none mb-4 ${focused ? "h-[150px]" : "h-[50px]"}`}
                 />
                 <div className="absolute bottom-10 right-5 ">
                     <Button variant="outline"
@@ -77,6 +73,7 @@ export default function Chat() {
                                     content: response
                                     }])
                                     setFocused(false)
+                                    setNewMessage({...newMessage, content: ""})
                                 }
                             )
                         }
