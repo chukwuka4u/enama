@@ -64,7 +64,7 @@ export default function Chat() {
                 />
                 <div className="absolute bottom-10 right-5">
                     <Button variant="outline"
-                        className="max-md:hover:none"
+                        className="max-md:active:scle-95"
                         disabled={newMessage.content === ""}
                         onClick={() => {
                             // adds the users {role; content} to messages
