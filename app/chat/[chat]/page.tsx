@@ -62,9 +62,9 @@ export default function Chat() {
                     })}
                     className={`relative resize-none mb-4 ${focused ? "h-[150px]" : "h-[50px]"}`}
                 />
-                <div className="absolute bottom-10 right-5 hover:none ">
+                <div className="absolute bottom-10 right-5">
                     <Button variant="outline"
-                        className="hover:none"
+                        className="max-md:hover:none"
                         disabled={newMessage.content === ""}
                         onClick={() => {
                             // adds the users {role; content} to messages
