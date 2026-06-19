@@ -32,7 +32,7 @@ export default function Chat() {
                     </div>  
                 )
                 : messages.map((message, index) => {
-                    if (message.role === "assistant") {
+                    if (message.role === "assistant" && message != null) {
                         const parsedMessage = parseMessageToJSX(message.content, () => console.log("option clicked"))
                         return (
                             <Card className=" w-[80%] bg-gray-100 my-2" key={index}>
@@ -62,15 +62,19 @@ export default function Chat() {
                     })}
                     className={`relative resize-none mb-4 ${focused ? "h-[150px]" : "h-[50px]"}`}
                 />
-                <div className="absolute bottom-10 right-5 ">
+                <div className="absolute bottom-10 right-5 hover:none ">
                     <Button variant="outline"
+                        className="hover:none"
+                        disabled={newMessage.content === ""}
                         onClick={() => {
+                            // adds the users {role; content} to messages
                             setMessages([...messages, newMessage])
-                            sendMessage(messages).then((response) => 
+                            // send the message to the api and get response
+                            sendMessage([...messages, newMessage]).then((response) => 
                                 {
                                     setMessages([...messages, newMessage, {
                                     role: "assistant",
-                                    content: response
+                                    content: response,
                                     }])
                                     setFocused(false)
                                     setNewMessage({...newMessage, content: ""})

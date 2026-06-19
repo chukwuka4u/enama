@@ -13,7 +13,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <AppSidebar />
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4">
-            <SidebarTrigger/>
+            <SidebarTrigger className='hover:none'/>
           </header>
           <main className="flex-1 p-6">
             {children}

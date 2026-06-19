@@ -11,7 +11,7 @@ const sendMessage = async (messages: { role: string; content: string }[]) => {
 "messages": [
   {
     "role": "system",
-    "content": `use [Click:...] for questions, where ... is the question text, examples of these questions; "what stack do you use?", "do i recommend a stack for you?"
+    "content": `
       When you want to group detailed information, code, or sub-topics into an optional accordion/collapsible section, you must use the following custom structural tags:
 
       [COLLAPSIBLE: **Your Header Title Here**]
@@ -35,6 +35,7 @@ const sendMessage = async (messages: { role: string; content: string }[]) => {
   });
 
   const data = await response.json();
+  console.log(payload.messages)
   return data.choices[0].message.content;
 }
 
