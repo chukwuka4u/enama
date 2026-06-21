@@ -7,18 +7,50 @@ import {
 } from "@/components/ui/card"
 import { ArrowUp } from "lucide-react"
 import { sendMessage } from "@/app/actions/chat"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Markdown from 'react-markdown'
 import remarkGfm from "remark-gfm"
 import { parseMessageToJSX } from "@/utils/parse-message"
 
-export default function Chat() {
+export default function Chat( {params} : {params : Promise<{ chat : string}>}) {
     const [focused, setFocused] = useState<boolean>(false)
     const [messages, setMessages] = useState<{role: string, content: string}[]>([])
+    const [currentChatId, setCurrentChatId] = useState<string | null>(null)
     const [newMessage, setNewMessage] = useState<{role: string, content: string}>({
         role: "user",
         content: ""
     })
+    
+    function storeMessages() {
+        const cht = JSON.stringify({
+            id: currentChatId?.slice(4),
+            title: currentChatId,
+            messages: messages
+        })
+        console.log(cht)
+        localStorage.setItem(currentChatId!, cht)
+    }
+
+    useEffect(
+        () => {
+            (
+                async function () {
+                   const {chat} = await params
+
+                   const oldChats = localStorage.getItem(chat)
+                   if (oldChats) {
+                        console.log(JSON.parse(oldChats).messages)
+                       setMessages(JSON.parse(oldChats).messages)
+                   }
+
+                   setCurrentChatId(chat)
+                }
+            )()
+            return storeMessages()
+        }
+    ,[params])
+
+    
     return (
         <div className="font-mono">
             {/* message array area */}
@@ -29,6 +61,7 @@ export default function Chat() {
                     <div className="text-center p-4">
                         <h3 className="md:text-[40px] md:font-bold font-semibold text-[30] leading-tight">What can I help you with?</h3>
                         <p className="text-xs text-gray-500">Ask a question, write code, or explore ideas.</p>
+                        <p className="text-xs text-gray-500">{currentChatId ?? "id"}</p>
                     </div>  
                 )
                 : messages.map((message, index) => {
@@ -64,11 +97,9 @@ export default function Chat() {
                 />
                 <div className="absolute bottom-10 right-5">
                     <Button variant="outline"
-                        className="max-md:active:scle-95"
+                        className="max-md:active:scale-95"
                         disabled={newMessage.content === ""}
                         onClick={() => {
-                            // adds the users {role; content} to messages
-                            setMessages([...messages, newMessage])
                             // send the message to the api and get response
                             sendMessage([...messages, newMessage]).then((response) => 
                                 {

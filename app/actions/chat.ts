@@ -35,7 +35,6 @@ const sendMessage = async (messages: { role: string; content: string }[]) => {
   });
 
   const data = await response.json();
-  console.log(payload.messages)
   return data.choices[0].message.content;
 }
 

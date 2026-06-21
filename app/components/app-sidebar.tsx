@@ -23,9 +23,11 @@ import { v4 as uuidv4 } from "uuid"
 import { 
   DropdownMenu,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation";
 
 
 export interface ChatProps{
@@ -35,8 +37,9 @@ export interface ChatProps{
 }
 
 export function AppSidebar() {
+  const router = useRouter();
   const { state } = useSidebar();
-  const [savedChat, setSavedChat] = useState<ChatProps[]>([]);
+  const [savedChat, setSavedChat] = useState<string[]>([]);
   const collapsed = state === 'collapsed';
 
   const fetchSavedChat = async () => {
@@ -47,7 +50,7 @@ export function AppSidebar() {
       if (key.startsWith("chat") && key) {
         const stringChat = localStorage.getItem(key)
         const chat = JSON.parse(stringChat!)
-        setSavedChat(prev => [...prev, ...chat])
+        setSavedChat(prev => [...prev, `chat${chat.id}`])
       }
     }
   }
@@ -58,21 +61,21 @@ export function AppSidebar() {
       title: "Untitled",
       messages: []
     }
-    // localStorage.setItem(`chat${newChat.id}`, JSON.stringify(newChat))
+    localStorage.setItem(`chat${newChat.id}`, JSON.stringify(newChat))
     console.log(newChat)
-    // return newChat;
+    setSavedChat([...savedChat, `chat${newChat.id}`])
   }
 
   const deleteAllChat = () => {
-    // for (let i = 0; i < localStorage.length; i++) {
-    //   const key = localStorage.key(i);
-    //   if (!key) continue;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
 
-    //   if (key.startsWith("chat") && key) {
-    //     localStorage.removeItem(key)
-    //   }
-    // }
-    console.log("delete all chat")
+      if (key.startsWith("chat") && key) {
+        localStorage.removeItem(key)
+      }
+    }
+    setSavedChat([])
   }
 
   const renameChat = (id : string, newTitle: string) => {
@@ -93,11 +96,9 @@ export function AppSidebar() {
       await fetchSavedChat();
     }
     init();
-  }, [savedChat])
+  }, [])
   // const items = savedChat;
-  const items = [
-    {title: "Untitled"}
-  ];
+  const items = savedChat;
   const actions = [
     { title: "New Chat ", method: createNewChat, icon: SquarePen },
     { title: "Delete All", method: deleteAllChat, icon: Trash },
@@ -156,7 +157,7 @@ export function AppSidebar() {
                     <Button
                       onClick={() => {action.method()}}
                       className="hover:bg-sidebar-accent font-mono bg-white text-black" 
-                    //   activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                      // activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                     >
                       <action.icon className="h-4 w-4" />
                       {!collapsed && <span>{action.title}</span>}
@@ -170,42 +171,46 @@ export function AppSidebar() {
           <SidebarGroupLabel className={collapsed ? "sr-only" : "font-mono"}>HISTORY</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {items.map((item, index) => (
+                <SidebarMenuItem key={index}>
                   <SidebarMenuButton asChild>
                     <div className="flex flex-1 justify-between">
                     <Button 
-                      onClick={() => {console.log("set the chat url, fetch the chat and show")}}
-                      className="hover:bg-sidebar-accent font-mono bg-white text-black w-[300px] bg-transparent" 
+                      onClick={() => {
+                        router.push(`/chat/${item}`)
+                      }}
+                      className="hover:bg-sidebar-accent font-mono bg-white text-black bg-transparent truncate flex-1/3" 
                       //activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                       >
                         {!collapsed &&
                           (
-                            <span className="text-gray-500 text-sm">{item.title}</span>
+                            <span className="text-gray-500 text-sm">{item}</span>
                           )
                         }
                     </Button>
                     {!collapsed &&
                       (
-                        <div
-                          onClick={() => console.log("show rename and delete")}
-                        >
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Ellipsis className="h-4 w-4 z-10" />
                           </DropdownMenuTrigger>
+                          <DropdownMenuGroup>
                           <DropdownMenuContent>
                             <DropdownMenuItem className="flex justify-between font-mono">
-                              Rename
+                                <div>
+                                  Rename
+                                </div>
                               <SquarePen />
                             </DropdownMenuItem>
                             <DropdownMenuItem className="flex justify-between font-mono">
-                              Delete
+                                <div>
+                                  Delete
+                                </div>
                               <Trash />
                             </DropdownMenuItem>
                           </DropdownMenuContent>
+                          </DropdownMenuGroup>
                         </DropdownMenu>
-                        </div>
                       )
                     }
                     </div>
