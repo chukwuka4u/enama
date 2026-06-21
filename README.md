@@ -14,3 +14,5 @@ If you want to contribute to the project;
 1. fork the project.
 2. run "git clone #url" url is your forked repo url.
 3. follow step 3 - 6 above.
+
+Check the "Issues" tab for ways you can contribute (:
